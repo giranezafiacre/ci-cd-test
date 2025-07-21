@@ -1,0 +1,58 @@
+name: Build and Scan APK with MobSF
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Java & Android SDK
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: default
+          arch: x86
+          profile: Nexus 5
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          cd android && ./gradlew assembleRelease
+
+      - name: Upload to MobSF and Scan
+        env:
+          MOBSF_API_KEY: ${{secrets.MOBSF_API_KEY}}
+          MOBSF_URL: https://d409698740f5.ngrok-free.app
+        run: |
+          APK_PATH=android/app/build/outputs/apk/release/app-release.apk
+
+          # Upload the APK
+          RESPONSE=$(curl -X POST "$MOBSF_URL/api/v1/upload" \
+            -H "Authorization: $MOBSF_API_KEY" \
+            -F "file=@$APK_PATH")
+
+          SCAN_HASH=$(echo $RESPONSE | jq -r .hash)
+
+          # Start the scan
+          curl -X POST "$MOBSF_URL/api/v1/scan" \
+            -H "Authorization: $MOBSF_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"hash\":\"$SCAN_HASH\"}"
+
+          # Optional: Fetch scan results as JSON
+          curl -X POST "$MOBSF_URL/api/v1/report_json" \
+            -H "Authorization: $MOBSF_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"hash\":\"$SCAN_HASH\"}" > mobsf_result.json
