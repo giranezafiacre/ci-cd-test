@@ -28,7 +28,7 @@ jobs:
           node-version: 18
 
       - name: Install Dependencies and Build APK
-        run: |
+        run: ./ci-cd-test
           npm install
           cd android
           ./gradlew assembleRelease
