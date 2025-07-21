@@ -61,7 +61,7 @@ jobs:
             -d "{\"hash\":\"$SCAN_HASH\"}" > mobsf_result.json
 
       - name: Upload MobSF Report as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mobsf-json-report
           path: mobsf_result.json
