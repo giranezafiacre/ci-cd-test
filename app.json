@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "my-app",
+    "slug": "my-app",
+    "scheme": "com.fiacregiraneza.myapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "jsEngine": "hermes",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fiacregiraneza.myapp",
+      "scheme": "com.googleusercontent.apps.960743488427-l05cgrg971uph3ksrsf8pn0lkk0lfo5m",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "fetch"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.fiacregiraneza.myapp"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "da3cd6aa-cff1-4c12-af20-0a81dd90bdbc"
+      }
+    }
+  }
+}
