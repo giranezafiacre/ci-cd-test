@@ -26,12 +26,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
 
-      - name: Install Dependencies and Build APK
+      - name: Build APK
         run: |
-          npm install
-          cd android
-          ./gradlew assembleRelease
+            cd android
+            ./gradlew assembleRelease
 
       - name: Upload to MobSF and Scan
         env:
