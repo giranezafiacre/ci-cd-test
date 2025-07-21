@@ -29,7 +29,6 @@ jobs:
 
       - name: Install Dependencies and Build APK
         run: |
-          cd ci-cd-test
           npm install
           cd android
           ./gradlew assembleRelease
