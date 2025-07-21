@@ -13,46 +13,55 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up Java & Android SDK
-        uses: reactivecircus/android-emulator-runner@v2
+      - name: Set up Java
+        uses: actions/setup-java@v3
         with:
-          api-level: 30
-          target: default
-          arch: x86
-          profile: Nexus 5
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Install Node
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install Dependencies
+      - name: Install Dependencies and Build APK
         run: |
           npm install
-          cd android && ./gradlew assembleRelease
+          cd android
+          ./gradlew assembleRelease
 
       - name: Upload to MobSF and Scan
         env:
-          MOBSF_API_KEY: ${{secrets.MOBSF_API_KEY}}
+          MOBSF_API_KEY: ${{ secrets.MOBSF_API_KEY }}
           MOBSF_URL: https://d409698740f5.ngrok-free.app
         run: |
           APK_PATH=android/app/build/outputs/apk/release/app-release.apk
 
-          # Upload the APK
-          RESPONSE=$(curl -X POST "$MOBSF_URL/api/v1/upload" \
+          echo "Uploading APK to MobSF..."
+          RESPONSE=$(curl -s -X POST "$MOBSF_URL/api/v1/upload" \
             -H "Authorization: $MOBSF_API_KEY" \
             -F "file=@$APK_PATH")
 
           SCAN_HASH=$(echo $RESPONSE | jq -r .hash)
+          echo "Scan hash: $SCAN_HASH"
 
-          # Start the scan
-          curl -X POST "$MOBSF_URL/api/v1/scan" \
+          echo "Triggering scan..."
+          curl -s -X POST "$MOBSF_URL/api/v1/scan" \
             -H "Authorization: $MOBSF_API_KEY" \
             -H "Content-Type: application/json" \
             -d "{\"hash\":\"$SCAN_HASH\"}"
 
-          # Optional: Fetch scan results as JSON
-          curl -X POST "$MOBSF_URL/api/v1/report_json" \
+          echo "Downloading scan report..."
+          curl -s -X POST "$MOBSF_URL/api/v1/report_json" \
             -H "Authorization: $MOBSF_API_KEY" \
             -H "Content-Type: application/json" \
             -d "{\"hash\":\"$SCAN_HASH\"}" > mobsf_result.json
+
+      - name: Upload MobSF Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: mobsf-json-report
+          path: mobsf_result.json
